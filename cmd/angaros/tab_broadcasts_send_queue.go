@@ -79,6 +79,40 @@ func tabBroadcastsSendQueue(w fyne.Window) *container.TabItem {
 					}
 				},
 			}, {
+				Name: "Sent",
+				Func: func(v dbutil.Saveable, refreshChan chan<- struct{}) func() {
+					return func() {
+						var bSends []broadcast.BroadcastSend
+						if err := db.View(func(tx *bolt.Tx) error {
+							var b broadcast.Broadcast
+							err := dbutil.GetByKeyTx(tx, v.DBKey(), &b)
+							if err != nil { // don't ignore dbutil.ErrNotFound
+								return fmt.Errorf("dbutil.GetByKeyTx failed: %s", err)
+							}
+							err = dbutil.ForEachPrefixTx(tx, &broadcast.BroadcastSend{}, b.ID[:], func(k []byte, v interface{}) error {
+								vCasted, ok := v.(broadcast.BroadcastSend)
+								if !ok {
+									return fmt.Errorf("value %v is not a broadcast send", v)
+								}
+								bSends = append(bSends, vCasted)
+								return nil
+							})
+							if err != nil {
+								return fmt.Errorf("dbutil.ForEachPrefixTx failed: %s", err)
+							}
+							return nil
+						}); err != nil {
+							logAndShowError(fmt.Errorf("database error: %s", err), w)
+							return
+						}
+						var buf strings.Builder
+						for _, bSend := range bSends {
+							buf.WriteString(bSend.String() + "\n")
+						}
+						widget2.ShowModal(w, "Sent", "", "Close", widget.NewLabel(buf.String()), nil)
+					}
+				},
+			}, {
 				Name: "Delete",
 				Func: func(v dbutil.Saveable, refreshChan chan<- struct{}) func() {
 					return func() {
