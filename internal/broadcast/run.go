@@ -95,6 +95,21 @@ func (b BroadcastSend) DBKey() []byte {
 	return bytes.Join([][]byte{b.BroadcastID[:], buf}, nil)
 }
 
+func (b BroadcastSend) String() string {
+	var sentStr string
+	switch b.Sent {
+	case 0:
+		sentStr = "no"
+	case 1:
+		sentStr = "?"
+	case 2:
+		sentStr = "yes"
+	default:
+		sentStr = "invalid value"
+	}
+	return fmt.Sprintf("index: %d, Sent: %s, Error: %s", b.Index, sentStr, b.ErrorStr)
+}
+
 func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger, defaultSendHours SettingSendHours, defaultTimezone SettingTimezone) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
