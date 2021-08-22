@@ -8,6 +8,10 @@ Emails are sent via an SMTP service of your choice.
 
 SMS are sent via your *Android* phone connected to your computer with the help of [third party software](#third-party-software).
 
+## Demo video
+
+<https://www.youtube.com/watch?v=8xGLsArv3JI>
+
 ## Supported platforms
 
 It should work on *Linux*, *Windows 8.1+*, *macOS 10.13+*, although it has only been tested on *Linux* and *macOS 11*.
