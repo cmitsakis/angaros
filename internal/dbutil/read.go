@@ -149,6 +149,30 @@ func ForEachReverseTx(tx *bolt.Tx, typ Saveable, f func([]byte, interface{}) err
 	return nil
 }
 
+func ForEachPrefix(db *bolt.DB, val Saveable, f func([]byte, interface{}) error) error {
+	if err := db.View(func(tx *bolt.Tx) error {
+		return ForEachTx(tx, val, f)
+	}); err != nil {
+		return fmt.Errorf("transaction (View) failed: %w", err)
+	}
+	return nil
+}
+
+func ForEachPrefixTx(tx *bolt.Tx, typ Saveable, prefix []byte, f func([]byte, interface{}) error) error {
+	b := tx.Bucket([]byte(typ.DBTable()))
+	if b == nil {
+		return nil
+	}
+	c := b.Cursor()
+	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+		err := unmarshalAndRun(typ, k, v, f)
+		if err != nil {
+			return fmt.Errorf("unmarshalAndRun() failed: %w", err)
+		}
+	}
+	return nil
+}
+
 func ForEachStartPrefix(db *bolt.DB, table string, start, prefix []byte, val interface{}, f func([]byte, interface{}) error) error {
 	if err := db.View(func(tx *bolt.Tx) error {
 		return ForEachStartPrefixTx(tx, table, start, prefix, val, f)
