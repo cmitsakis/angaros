@@ -97,7 +97,7 @@ func main() {
 	w := a.NewWindow("Angaros")
 	w.SetMaster()
 	a.Settings().SetTheme(theme.LightTheme())
-	tabs := container.NewAppTabs(tabBroadcasts(w), tabSMSAndroid(w), tabEmail(w), tabAbout())
+	tabs := container.NewAppTabs(tabBroadcasts(w), tabSMSAndroid(w), tabEmail(w), tabAbout(w))
 	w.SetContent(tabs)
 	w.Resize(fyne.NewSize(1280, 720))
 	w.ShowAndRun()
