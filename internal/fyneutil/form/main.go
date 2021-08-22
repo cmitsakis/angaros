@@ -5,49 +5,11 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	widgetx "fyne.io/x/fyne/widget"
-)
 
-func showModal(w fyne.Window, title, confirm, dismiss string, content fyne.CanvasObject, callback func() error) {
-	var modal *widget.PopUp
-	contentScroll := container.NewVScroll(content)
-	top := container.NewVBox(
-		widget.NewLabelWithStyle(title, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		widget.NewSeparator(),
-	)
-	bottom := container.NewHBox(
-		layout.NewSpacer(),
-		widget.NewButtonWithIcon(dismiss, theme.CancelIcon(), func() {
-			modal.Hide()
-		}),
-		widget.NewButtonWithIcon(confirm, theme.ConfirmIcon(), func() {
-			err := callback()
-			if err != nil {
-				dialog.ShowError(err, w)
-			} else {
-				modal.Hide()
-			}
-		}),
-		layout.NewSpacer(),
-	)
-	contentBox := container.NewBorder(top, bottom, nil, nil, contentScroll)
-	modal = widget.NewModalPopUp(contentBox, w.Canvas())
-	// calculate the size of the modal by creating another temporary modal without scroll and getting it's size
-	mSize := func() fyne.Size {
-		tempContentBox := container.NewBorder(top, bottom, nil, nil, content)
-		tempModal := widget.NewModalPopUp(tempContentBox, w.Canvas())
-		s := tempContentBox.Size()
-		tempModal.Hide()
-		return fyne.Size{Height: s.Height + 10, Width: s.Width}
-	}()
-	mSize = mSize.Min(w.Canvas().Size())
-	modal.Resize(mSize)
-	modal.Show()
-}
+	widget2 "go.angaros.io/internal/fyneutil/widget"
+)
 
 func NewValue(w fyne.Window, description string, onEdit func(chan<- string), onClear func(chan<- string)) *fyne.Container {
 	label := widget.NewLabel("")
@@ -62,7 +24,7 @@ func NewValue(w fyne.Window, description string, onEdit func(chan<- string), onC
 		widget.NewButton("Edit", func() { onEdit(labelUpdates) }),
 		widget.NewButton("Clear", func() {
 			content := widget.NewLabel("Are you sure you want to clear this value?")
-			showModal(w, "Clear Value", "Confirm", "Cancel", content, func() error {
+			widget2.ShowModal(w, "Clear Value", "Confirm", "Cancel", content, func() error {
 				onClear(labelUpdates)
 				return nil
 			})
@@ -79,7 +41,7 @@ func ShowEntryPopup(w fyne.Window, title, description, placeHolder, existingValu
 		widget.NewLabel(description),
 		entry,
 	)
-	showModal(w, title, "Save", "Cancel", content, func() error {
+	widget2.ShowModal(w, title, "Save", "Cancel", content, func() error {
 		entryText := entry.Text
 		return onSubmit(entryText)
 	})
@@ -106,7 +68,7 @@ func ShowEntryCompletionPopup(w fyne.Window, title, description, placeHolder, ex
 		widget.NewLabel(description),
 		entry,
 	)
-	showModal(w, title, "Save", "Cancel", content, func() error {
+	widget2.ShowModal(w, title, "Save", "Cancel", content, func() error {
 		entryText := entry.Text
 		return onSubmit(entryText)
 	})
@@ -124,7 +86,7 @@ func ShowSelectionPopup(w fyne.Window, title, description, action string, option
 		widget.NewLabel(description),
 		selectWidget,
 	)
-	showModal(w, title, action, "Cancel", content, func() error {
+	widget2.ShowModal(w, title, action, "Cancel", content, func() error {
 		if selectWidget.SelectedIndex() >= 0 && selectWidget.SelectedIndex() < len(options) {
 			return onSubmit(options[selectWidget.SelectedIndex()], selectWidget.SelectedIndex())
 		} else {
@@ -210,7 +172,7 @@ func ShowFormPopup(w fyne.Window, title, description string, fields []FormField,
 		widget.NewLabel(description),
 		f,
 	)
-	showModal(w, title, "Save", "Cancel", content, func() error {
+	widget2.ShowModal(w, title, "Save", "Cancel", content, func() error {
 		submittedValues := make([]string, 0, len(fields))
 		for i, field := range fields {
 			switch field.Type {
@@ -227,5 +189,5 @@ func ShowFormPopup(w fyne.Window, title, description string, fields []FormField,
 }
 
 func ShowCustomPopup(w fyne.Window, title, description, confirmText, cancelText string, content fyne.CanvasObject, onSubmit func() error) {
-	showModal(w, title, confirmText, cancelText, content, onSubmit)
+	widget2.ShowModal(w, title, confirmText, cancelText, content, onSubmit)
 }
