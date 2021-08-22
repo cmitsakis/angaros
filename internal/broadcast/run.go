@@ -235,7 +235,11 @@ func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger,
 			// update DB
 			bRun.NextIndex = i + 1
 			errDB := db.Update(func(tx *bolt.Tx) error {
-				err = dbutil.UpsertSaveableTx(tx, BroadcastSend{BroadcastID: b.ID, Index: i, Sent: sent, ErrorStr: fmt.Sprintf("%s", errSend)})
+				var errStr string
+				if errSend != nil {
+					errStr = fmt.Sprintf("%s", errSend)
+				}
+				err = dbutil.UpsertSaveableTx(tx, BroadcastSend{BroadcastID: b.ID, Index: i, Sent: sent, ErrorStr: errStr})
 				if err != nil {
 					return fmt.Errorf("failed to update BroadcastSend: %s", err)
 				}
