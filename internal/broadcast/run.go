@@ -99,15 +99,19 @@ func (b BroadcastSend) String() string {
 	var sentStr string
 	switch b.Sent {
 	case 0:
-		sentStr = "no"
+		sentStr = "NO"
 	case 1:
 		sentStr = "?"
 	case 2:
-		sentStr = "yes"
+		sentStr = "YES"
 	default:
 		sentStr = "invalid value"
 	}
-	return fmt.Sprintf("index: %d, Sent: %s, Error: %s", b.Index, sentStr, b.ErrorStr)
+	var errorStr string
+	if b.ErrorStr != "" {
+		errorStr = ", error=" + b.ErrorStr
+	}
+	return fmt.Sprintf("contact #%d: sent=%s%s", b.Index+1, sentStr, errorStr)
 }
 
 func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger, defaultSendHours SettingSendHours, defaultTimezone SettingTimezone) error {
