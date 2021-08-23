@@ -63,7 +63,9 @@ Alternatively you can install *KDE Connect* but it currently doesn't work. It's 
 1. [download](https://developer.android.com/studio/releases/platform-tools#downloads) and install *ADB*
 2. start *ADB*
 3. connect your *Android* phone to your computer via USB
-4. enable USB debugging on your phone
+4. enable developer options and USB debugging on your phone
+   - [instructions](https://developer.android.com/studio/debug/dev-options) for most *Android* phones
+   - [instructions](https://help.airdroid.com/hc/en-us/articles/360045329413-How-to-Enable-USB-debugging-on-Xiaomi-) for *Xiaomi* phones
 
 #### KDE Connect (for testing only)
 
