@@ -207,8 +207,8 @@ func (b *Broadcast) getStartableInFromTx(tx *bolt.Tx) (*time.Duration, error) {
 }
 
 func (b *Broadcast) ReadStatusFromTx(tx *bolt.Tx) error {
-	var run BroadcastRun
-	err := dbutil.GetByKeyTx(tx, BroadcastRun{BroadcastID: b.ID}.DBKey(), &run)
+	var run Run
+	err := dbutil.GetByKeyTx(tx, Run{BroadcastID: b.ID}.DBKey(), &run)
 	if err != nil && !errors.Is(err, dbutil.ErrNotFound) {
 		return fmt.Errorf("database error")
 	}

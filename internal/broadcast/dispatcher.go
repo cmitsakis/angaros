@@ -101,8 +101,8 @@ func Dispatcher(ctx context.Context, db *bolt.DB, loggerInfo *log.Logger, logger
 			}
 
 			// check if broadcast has finished
-			var r BroadcastRun
-			err = dbutil.GetByKey(db, BroadcastRun{BroadcastID: b.ID}.DBKey(), &r)
+			var r Run
+			err = dbutil.GetByKey(db, Run{BroadcastID: b.ID}.DBKey(), &r)
 			if err != nil && !errors.Is(err, dbutil.ErrNotFound) {
 				loggerDebugB.Println("dbutil.GetByKeyarray failed")
 				continue

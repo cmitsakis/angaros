@@ -82,15 +82,15 @@ func tabBroadcastsSendQueue(w fyne.Window) *container.TabItem {
 				Name: "Sent",
 				Func: func(v dbutil.Saveable, refreshChan chan<- struct{}) func() {
 					return func() {
-						var bSends []broadcast.BroadcastSend
+						var bSends []broadcast.Send
 						if err := db.View(func(tx *bolt.Tx) error {
 							var b broadcast.Broadcast
 							err := dbutil.GetByKeyTx(tx, v.DBKey(), &b)
 							if err != nil { // don't ignore dbutil.ErrNotFound
 								return fmt.Errorf("dbutil.GetByKeyTx failed: %s", err)
 							}
-							err = dbutil.ForEachPrefixTx(tx, &broadcast.BroadcastSend{}, b.ID[:], func(k []byte, v interface{}) error {
-								vCasted, ok := v.(broadcast.BroadcastSend)
+							err = dbutil.ForEachPrefixTx(tx, &broadcast.Send{}, b.ID[:], func(k []byte, v interface{}) error {
+								vCasted, ok := v.(broadcast.Send)
 								if !ok {
 									return fmt.Errorf("value %v is not a broadcast send", v)
 								}
@@ -124,13 +124,13 @@ func tabBroadcastsSendQueue(w fyne.Window) *container.TabItem {
 									if err != nil {
 										return fmt.Errorf("failed to delete Broadcast: %s", err)
 									}
-									err = dbutil.DeleteByTableKeyTx(tx, broadcast.BroadcastRun{}.DBTable(), v.DBKey())
+									err = dbutil.DeleteByTableKeyTx(tx, broadcast.Run{}.DBTable(), v.DBKey())
 									if err != nil {
-										return fmt.Errorf("failed to delete BroadcastRun: %s", err)
+										return fmt.Errorf("failed to delete Run: %s", err)
 									}
-									err = dbutil.DeletePrefixTx(tx, broadcast.BroadcastSend{}.DBTable(), v.DBKey())
+									err = dbutil.DeletePrefixTx(tx, broadcast.Send{}.DBTable(), v.DBKey())
 									if err != nil {
-										return fmt.Errorf("failed to delete BroadcastSend: %s", err)
+										return fmt.Errorf("failed to delete Send: %s", err)
 									}
 									return nil
 								}); err != nil {

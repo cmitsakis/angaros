@@ -23,7 +23,7 @@ import (
 	"go.angaros.io/internal/gateway/sms/android"
 )
 
-type BroadcastRun struct {
+type Run struct {
 	BroadcastID  ulid.ULID
 	NextIndex    int
 	Length       int
@@ -31,11 +31,11 @@ type BroadcastRun struct {
 	senderClient gateway.SenderClient
 }
 
-func (b BroadcastRun) DBTable() string {
+func (b Run) DBTable() string {
 	return "broadcast.run"
 }
 
-func (b BroadcastRun) DBKey() []byte {
+func (b Run) DBKey() []byte {
 	return b.BroadcastID[:]
 }
 
@@ -44,18 +44,18 @@ var (
 	tableNameDeviceAndroid = new(android.Device).DBTable()
 )
 
-func newBroadcastRun(db *bolt.DB, b Broadcast) (BroadcastRun, error) {
-	var existingRun BroadcastRun
-	err := dbutil.GetByKey(db, BroadcastRun{BroadcastID: b.ID}.DBKey(), &existingRun)
+func newRun(db *bolt.DB, b Broadcast) (Run, error) {
+	var existingRun Run
+	err := dbutil.GetByKey(db, Run{BroadcastID: b.ID}.DBKey(), &existingRun)
 	if err != nil && !errors.Is(err, dbutil.ErrNotFound) {
-		return BroadcastRun{}, fmt.Errorf("cannot read broadcast run from database: %s", err)
+		return Run{}, fmt.Errorf("cannot read broadcast run from database: %s", err)
 	}
 	if b.GatewayType == tableNameEmailIdentity {
 		senderClient, err := email.NewSenderClientFromKey(db, b.GatewayKey)
 		if err != nil {
-			return BroadcastRun{}, fmt.Errorf("cannot create sender client from key: %s error: %s", b.GatewayKey, err)
+			return Run{}, fmt.Errorf("cannot create sender client from key: %s error: %s", b.GatewayKey, err)
 		}
-		return BroadcastRun{
+		return Run{
 			BroadcastID:  b.ID,
 			broadcast:    b,
 			senderClient: senderClient,
@@ -65,9 +65,9 @@ func newBroadcastRun(db *bolt.DB, b Broadcast) (BroadcastRun, error) {
 	} else if b.GatewayType == tableNameDeviceAndroid {
 		senderClient, err := android.NewSenderClientFromKey(db, b.GatewayKey)
 		if err != nil {
-			return BroadcastRun{}, fmt.Errorf("cannot create sender client from key: %s error: %s", b.GatewayKey, err)
+			return Run{}, fmt.Errorf("cannot create sender client from key: %s error: %s", b.GatewayKey, err)
 		}
-		return BroadcastRun{
+		return Run{
 			BroadcastID:  b.ID,
 			broadcast:    b,
 			senderClient: senderClient,
@@ -75,27 +75,27 @@ func newBroadcastRun(db *bolt.DB, b Broadcast) (BroadcastRun, error) {
 			Length:       len(b.Contacts),
 		}, nil
 	}
-	return BroadcastRun{}, fmt.Errorf("unknown b.GatewayType %s", b.GatewayType)
+	return Run{}, fmt.Errorf("unknown b.GatewayType %s", b.GatewayType)
 }
 
-type BroadcastSend struct {
+type Send struct {
 	BroadcastID ulid.ULID
 	Index       int
 	Sent        int
 	ErrorStr    string
 }
 
-func (b BroadcastSend) DBTable() string {
+func (b Send) DBTable() string {
 	return "broadcast.send"
 }
 
-func (b BroadcastSend) DBKey() []byte {
+func (b Send) DBKey() []byte {
 	buf := make([]byte, 4)
 	binary.BigEndian.PutUint32(buf, uint32(b.Index))
 	return bytes.Join([][]byte{b.BroadcastID[:], buf}, nil)
 }
 
-func (b BroadcastSend) String() string {
+func (b Send) String() string {
 	var sentStr string
 	switch b.Sent {
 	case 0:
@@ -118,9 +118,9 @@ func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger,
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	loggerDebugRun := log.New(loggerDebug.Writer(), loggerDebug.Prefix()+"[run] [broadcast: "+b.ID.String()+"] ", loggerDebug.Flags())
-	bRun, err := newBroadcastRun(db, b)
+	bRun, err := newRun(db, b)
 	if err != nil {
-		return fmt.Errorf("broadcast %s could not be started - newBroadcastRun() failed: %s", b.ID.String(), err)
+		return fmt.Errorf("broadcast %s could not be started - newRun() failed: %s", b.ID.String(), err)
 	}
 	err = bRun.senderClient.PreSend(ctx)
 	if err != nil {
@@ -258,9 +258,9 @@ func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger,
 				if errSend != nil {
 					errStr = fmt.Sprintf("%s", errSend)
 				}
-				err = dbutil.UpsertSaveableTx(tx, BroadcastSend{BroadcastID: b.ID, Index: i, Sent: sent, ErrorStr: errStr})
+				err = dbutil.UpsertSaveableTx(tx, Send{BroadcastID: b.ID, Index: i, Sent: sent, ErrorStr: errStr})
 				if err != nil {
-					return fmt.Errorf("failed to update BroadcastSend: %s", err)
+					return fmt.Errorf("failed to update Send: %s", err)
 				}
 				if sent == 0 {
 					// message wasn't sent so don't count it
