@@ -132,11 +132,11 @@ func run(ctx context.Context, b Broadcast, db *bolt.DB, loggerDebug *log.Logger,
 			loggerDebugRun.Printf("PostSend() failed: %v\n", err)
 		}
 	}()
-	msgTmplSubject, err := template.New("msg").Parse(bRun.broadcast.MsgRawSubject)
+	msgTmplSubject, err := template.New("msg").Parse(bRun.broadcast.MsgSubject)
 	if err != nil {
 		return fmt.Errorf("template.Parse failed: %s", err)
 	}
-	msgTmplBody, err := template.New("msg").Parse(bRun.broadcast.MsgRawBody)
+	msgTmplBody, err := template.New("msg").Parse(bRun.broadcast.MsgBody)
 	if err != nil {
 		return fmt.Errorf("template.Parse failed: %s", err)
 	}

@@ -32,19 +32,19 @@ func (rs TimeRanges) String() string {
 }
 
 type Broadcast struct {
-	Contacts      []Contact
-	MsgRawSubject string
-	MsgRawBody    string
-	ID            ulid.ULID
-	Filename      string
-	CreatedAt     time.Time
-	SendHours     []TimeRange
-	Timezone      string
-	SendDateFrom  time.Time
-	SendDateTo    time.Time
-	GatewayType   string
-	GatewayKey    []byte
-	status        string
+	ID           ulid.ULID
+	Contacts     []Contact
+	MsgSubject   string `cbor:"MsgRawSubject"`
+	MsgBody      string `cbor:"MsgRawBody"`
+	MsgBodyFile  string `cbor:"Filename"`
+	GatewayType  string
+	GatewayKey   []byte
+	SendDateFrom time.Time
+	SendDateTo   time.Time
+	SendHours    []TimeRange
+	Timezone     string
+	CreatedAt    time.Time
+	status       string
 }
 
 func (b Broadcast) DBTable() string {
@@ -258,16 +258,16 @@ func (b Broadcast) DetailsString(tx *bolt.Tx) (string, error) {
 	var buf strings.Builder
 	fmt.Fprintf(&buf, "ID: %s\n", b.ID.String())
 	fmt.Fprintf(&buf, "Contacts: %d\n", len(b.Contacts))
-	fmt.Fprintf(&buf, "Filename: %s\n", b.Filename)
-	fmt.Fprintf(&buf, "Message subject: %s\n", b.MsgRawSubject)
-	fmt.Fprintf(&buf, "Message body: %s\n", b.MsgRawBody)
+	fmt.Fprintf(&buf, "Message subject: %s\n", b.MsgSubject)
+	fmt.Fprintf(&buf, "Message body: %s\n", b.MsgBody)
+	fmt.Fprintf(&buf, "Message body file: %s\n", b.MsgBodyFile)
 	if err := b.ReadStatusFromTx(tx); err != nil {
 		return "", fmt.Errorf("failed to get status: %s", err)
 	}
 	fmt.Fprintf(&buf, "Status: %s\n", b.GetStatus())
+	fmt.Fprintf(&buf, "Gateway: %s\n", b.GatewayKey)
 	fmt.Fprintf(&buf, "Send date from: %v\n", b.SendDateFrom)
 	fmt.Fprintf(&buf, "Send date to: %v\n", b.SendDateTo)
 	fmt.Fprintf(&buf, "Send time: %v\n", b.SendHours)
-	fmt.Fprintf(&buf, "Gateway: %s\n", b.GatewayKey)
 	return buf.String(), nil
 }

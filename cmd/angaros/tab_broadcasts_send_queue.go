@@ -49,9 +49,9 @@ func tabBroadcastsSendQueue(w fyne.Window) *container.TabItem {
 			{Name: "Actions", Actions: true},
 			{Name: "ID", Field: "ID", Width: 270},
 			{Name: "Status", Field: "GetStatus", Width: 160},
-			{Name: "File", Field: "Filename", Width: 170},
-			{Name: "Message Subject", Field: "MsgRawSubject", Width: 220},
-			{Name: "Message Body", Field: "MsgRawBody", Width: 300},
+			{Name: "File", Field: "MsgBodyFile", Width: 170},
+			{Name: "Message Subject", Field: "MsgSubject", Width: 220},
+			{Name: "Message Body", Field: "MsgBody", Width: 300},
 		},
 		[]widget2.Action{
 			{
@@ -551,18 +551,18 @@ func showBroadcastWizard2(w fyne.Window, filename string, contacts []broadcast.C
 			return logAndReturnError(fmt.Errorf("Cannot create broadcast: %s", err))
 		}
 		b := broadcast.Broadcast{
-			ID:            id,
-			Contacts:      contacts,
-			MsgRawSubject: msgSubject,
-			MsgRawBody:    msgBodyFileStringBuilder.String(),
-			Filename:      filename,
-			SendHours:     sendHours,
-			Timezone:      timezoneSelected2,
-			SendDateFrom:  sendDate1,
-			SendDateTo:    sendDate2,
-			GatewayType:   gatewaySelected.DBTable(),
-			GatewayKey:    gatewaySelected.DBKey(),
-			CreatedAt:     time.Now(),
+			ID:           id,
+			Contacts:     contacts,
+			MsgSubject:   msgSubject,
+			MsgBody:      msgBodyFileStringBuilder.String(),
+			MsgBodyFile:  filename,
+			GatewayType:  gatewaySelected.DBTable(),
+			GatewayKey:   gatewaySelected.DBKey(),
+			SendDateFrom: sendDate1,
+			SendDateTo:   sendDate2,
+			SendHours:    sendHours,
+			Timezone:     timezoneSelected2,
+			CreatedAt:    time.Now(),
 		}
 		err = dbutil.UpsertSaveable(db, b)
 		if err != nil {
