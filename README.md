@@ -8,9 +8,7 @@ Emails are sent via an SMTP service of your choice.
 
 SMS are sent via your *Android* phone connected to your computer with the help of [third party software](#third-party-software).
 
-## Demo video
-
-<https://www.youtube.com/watch?v=8xGLsArv3JI>
+![Demo video](../media/demo.webp?raw=true)
 
 ## Supported platforms
 
